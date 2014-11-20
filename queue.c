@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #define true  (1)
 #define false (0)
 
@@ -46,6 +45,26 @@ QNode_create(int data)
 
 
 int
+QNode_destroy(Queue* Q, QNode* node)
+{
+	if (node == NULL)
+		return 0;
+	
+	if (node->next != NULL)
+		node->next->prev = node->prev;
+
+	if (node->prev != NULL)
+		node->prev->next = node->next;
+
+	free(node);
+	node = NULL;
+	Q->size--;
+
+	return 1;
+}
+
+
+int
 Q_is_empty(Queue* Q)
 {
 	return  Q->size == 0;
@@ -53,8 +72,10 @@ Q_is_empty(Queue* Q)
 
 
 QNode*
-Q_push(Queue* Q, QNode* node)
+Q_push(Queue* Q, int data)
 {
+	QNode* node;
+	node = QNode_create(data);
 	/* With first item in queue, there is nothing in front of it. */
 	node->next = Q_is_empty(Q) ? NULL : Q->tail;
 
@@ -75,11 +96,12 @@ QNode*
 Q_pop(Queue* Q)
 {
 	if (Q_is_empty(Q))
-		return (QNode*) -1;
+		return (QNode*) 0;
 
 	QNode* popped_node;
 	popped_node = Q->head;
 
+	/* If we are are at the last item, head points to tail */
 	Q->head = Q->head->prev ? Q->head->prev : Q->tail;
 
 	Q->head->next = NULL;
@@ -89,28 +111,38 @@ Q_pop(Queue* Q)
 }
 
 
+Queue*
+Q_teardown(Queue* Q)
+{
+	QNode* node;
+	while ((node = Q_pop(Q)))
+		free(node);
+	
+	return Q;
+}
+
+
 void
 Q_inspect(Queue* Q)
 {
-	if (Q_is_empty(Q)) {
-		printf("Empty queue.\n");
-		return;
-	}
-
 	QNode* cursor = Q->tail;
-	const char *sep = "";
+	const char *sep = "\t";
+	int counter = 0;
 
-	printf("Queue: [");
+	printf("Queue:\n");
 
-	do {
+	if(Q_is_empty(Q)) printf("[]");
+
+	while (cursor != Q->head) {
 		printf("%s%d", sep, cursor->data);
 		cursor = cursor->next;
-		sep = ", ";
-	} while (cursor != Q->head);
+		counter++;
+		sep = (counter % 10 == 0) ? ",\n\t" :  ", ";
+	}
 
-	printf("]\n");
-	printf("Size: %d\n", Q->size);
+	printf("\n\nSize: %d\n", Q->size);
 }
+
 
 int
 main()
@@ -119,20 +151,12 @@ main()
 	Q_create(&Q);
 
 	int i;
-	for (i = 0; i < 1000; i++) {
-		QNode* a;
-		a = QNode_create(i);
-		Q_push(&Q, a);
-	}
-
-	int j;
-	for (j = 0; j < 900; j++) {
-		QNode* popped;
-		popped = Q_pop(&Q);
-		free(popped);
-	}
+	for (i = 0; i < 1000; i++)
+		Q_push(&Q, i);
 
 	Q_inspect(&Q);
+	Q_teardown(&Q);
+	Q_inspect(&Q);
 
-	return true;
+	return EXIT_SUCCESS;
 }
