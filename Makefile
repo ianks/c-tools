@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -g
 
-fifo_queue: lib/fifo_queue.c
-	$(CC) $(CFLAGS) -o fifo_queue lib/fifo_queue.c
+fifo_queue:
+	$(CC) $(CFLAGS) -o examples/fifo_queue lib/fifo_queue.c examples/fifo_queue_example.c
 
 clean:
-	$(RM) fifo_queue
+	$(RM) examples/fifo_queue
