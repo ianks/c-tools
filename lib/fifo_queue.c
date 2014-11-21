@@ -1,22 +1,10 @@
+#include "fifo_queue.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
 #define true  (1)
 #define false (0)
-
-
-typedef struct QNode {
-	int data;
-	struct QNode* next;
-	struct QNode* prev;
-} QNode;
-
-
-typedef struct Queue {
-	int size;
-	QNode* head;
-	QNode* tail;
-} Queue;
 
 
 Queue*
@@ -141,22 +129,4 @@ Q_inspect(Queue* Q)
 	}
 
 	printf("\n\nSize: %d\n", Q->size);
-}
-
-
-int
-main()
-{
-	Queue Q;
-	Q_create(&Q);
-
-	int i;
-	for (i = 0; i < 1000; i++)
-		Q_push(&Q, i);
-
-	Q_inspect(&Q);
-	Q_teardown(&Q);
-	Q_inspect(&Q);
-
-	return EXIT_SUCCESS;
 }
